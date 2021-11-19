@@ -5,4 +5,6 @@ class AppRoutes {
   static const PRODUCT_DETAIL = '/product-detail';
   static const CART = '/cart';
   static const ORDERS = '/orders';
+  static const MANAGER_PRODUCTS = '/manager-products';
+  static const FORM_PRODUCTS = '/form-products';
 }

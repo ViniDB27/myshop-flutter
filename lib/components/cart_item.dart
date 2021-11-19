@@ -13,11 +13,32 @@ class CartItemWidget extends StatelessWidget {
     return Dismissible(
       key: ValueKey(cartItem.id),
       direction: DismissDirection.endToStart,
+      confirmDismiss: (_) {
+        return showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('Tem certeza'),
+            content: Text('Quer remover ${cartItem.name}?'),
+            actions: [
+              TextButton(
+                onPressed: (){
+                  Navigator.of(ctx).pop(false);
+                },
+                child: Text('Não'),
+              ),
+              TextButton(
+                onPressed: (){
+                  Navigator.of(ctx).pop(true);
+                },
+                child: Text('Sim'),
+              )
+            ],
+          ),
+        );
+      },
       onDismissed: (_) {
-        Provider.of<Cart>(
-          context,
-          listen: false
-        ).removerItem(cartItem.productId);
+        Provider.of<Cart>(context, listen: false)
+            .removerItem(cartItem.productId);
       },
       background: Container(
         color: Theme.of(context).errorColor,
@@ -47,8 +68,8 @@ class CartItemWidget extends StatelessWidget {
                 ),
               ),
               title: Text(cartItem.name),
-              subtitle:
-                  Text('Total: R\$ ${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}'),
+              subtitle: Text(
+                  'Total: R\$ ${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}'),
               trailing: Text('${cartItem.quantity}x')),
         ),
       ),
