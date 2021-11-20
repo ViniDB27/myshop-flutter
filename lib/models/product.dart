@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Product with ChangeNotifier {
   final String id;
@@ -7,6 +10,8 @@ class Product with ChangeNotifier {
   final double price;
   final String imageUrl;
   bool isFavorite;
+  final _url =
+      'https://flutter-curso-a235c-default-rtdb.firebaseio.com/products';
 
   Product({
     required this.id,
@@ -17,8 +22,12 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  void toggleFavorite() {
+  Future<void> toggleFavorite() async {
     isFavorite = !isFavorite;
     notifyListeners();
+    await http.patch(
+      Uri.parse('$_url/${this.id}.json'),
+      body: jsonEncode({"isFavorite": isFavorite}),
+    );
   }
 }
