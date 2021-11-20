@@ -11,7 +11,7 @@ class Product with ChangeNotifier {
   final String imageUrl;
   bool isFavorite;
   final _url =
-      'https://flutter-curso-a235c-default-rtdb.firebaseio.com/products';
+      'https://flutter-curso-a235c-default-rtdb.firebaseio.com/userFavorite';
 
   Product({
     required this.id,
@@ -22,12 +22,12 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavorite() async {
+  Future<void> toggleFavorite(String token, String userId) async {
     isFavorite = !isFavorite;
     notifyListeners();
-    await http.patch(
-      Uri.parse('$_url/${this.id}.json'),
-      body: jsonEncode({"isFavorite": isFavorite}),
+    await http.put(
+      Uri.parse('$_url/${userId}/${this.id}.json?auth=$token'),
+      body: jsonEncode(isFavorite),
     );
   }
 }

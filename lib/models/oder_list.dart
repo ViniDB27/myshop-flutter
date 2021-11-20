@@ -6,25 +6,33 @@ import 'package:shop/models/oder.dart';
 import 'package:http/http.dart' as http;
 
 class OrderList with ChangeNotifier {
+  String _token;
+  String _userId;
   List<Order> _items = [];
   final _url =
-      'https://flutter-curso-a235c-default-rtdb.firebaseio.com/orders.json';
+      'https://flutter-curso-a235c-default-rtdb.firebaseio.com/orders';
 
   List<Order> get items {
     return [..._items];
   }
+
+  OrderList([
+    this._token = '',
+    this._userId = '',
+    this._items = const [],
+  ]);
 
   int get ItemsCount {
     return _items.length;
   }
 
   Future<void> loadOrders() async {
-    _items.clear();
-    final response = await http.get(Uri.parse(_url));
+    List<Order> items = [];
+    final response = await http.get(Uri.parse('$_url/${_userId}.json?auth=$_token'));
     if (response.body == 'null') return;
     Map<String, dynamic> data = jsonDecode(response.body);
     data.forEach((orderId, orderData) {
-      _items.insert(
+      items.insert(
         0,
         Order(
           id: orderId,
@@ -42,13 +50,14 @@ class OrderList with ChangeNotifier {
         ),
       );
     });
+    this._items = items.reversed.toList();
     notifyListeners();
   }
 
   Future<void> addOrder(Cart cart) async {
     final date = DateTime.now();
     final response = await http.post(
-      Uri.parse(_url),
+      Uri.parse('$_url/${_userId}.json?auth=$_token'),
       body: jsonEncode({
         "total": cart.totalAmount,
         "date": date.toIso8601String(),
