@@ -27,10 +27,11 @@ class _AuthFormState extends State<AuthForm>
   };
 
   AnimationController? _controller;
-  Animation<Size>? _heightAnimation;
+  Animation<double>? _opacityAnimation;
+  Animation<Offset>? _slideAnimation;
 
   bool _isSignin() => _authMode == AuthMode.Signin;
-  bool _isSignup() => _authMode == AuthMode.Signup;
+  // bool _isSignup() => _authMode == AuthMode.Signup;
 
   @override
   void initState() {
@@ -42,9 +43,19 @@ class _AuthFormState extends State<AuthForm>
       ),
     );
 
-    _heightAnimation = Tween(
-      begin: Size(double.infinity, 310),
-      end: Size(double.infinity, 400),
+    _opacityAnimation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller!,
+        curve: Curves.linear,
+      ),
+    );
+    
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, -1.5),
+      end: Offset(0, 0),
     ).animate(
       CurvedAnimation(
         parent: _controller!,
@@ -125,15 +136,13 @@ class _AuthFormState extends State<AuthForm>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      child: AnimatedBuilder(
-        animation: _heightAnimation!,
-        builder: (ctx, child) => Container(
-          padding: EdgeInsets.all(16),
-          // height: _isSignin() ? 310 : 400,
-          height: _heightAnimation?.value.height ?? (_isSignin() ? 310 : 400),
-          width: deviceSize.width * 0.75,
-          child: child,
-        ),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 250),
+        curve: Curves.linear,
+        padding: EdgeInsets.all(16),
+        height: _isSignin() ? 310 : 400,
+        // height: _heightAnimation?.value.height ?? (_isSignin() ? 310 : 400),
+        width: deviceSize.width * 0.75,
         child: Form(
           key: _formKey,
           child: Column(
@@ -164,21 +173,34 @@ class _AuthFormState extends State<AuthForm>
                   return null;
                 },
               ),
-              if (_isSignup())
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Confirmar Senha'),
-                  keyboardType: TextInputType.emailAddress,
-                  obscureText: true,
-                  validator: _isSignin()
-                      ? null
-                      : (_password) {
-                          final cpassword = _password ?? '';
-                          if (cpassword != _passwordController.text) {
-                            return 'As senhas não coincidem';
-                          }
-                          return null;
-                        },
+              AnimatedContainer(
+                constraints: BoxConstraints(
+                  minHeight: _isSignin() ? 0 : 60,
+                  maxHeight: _isSignin() ? 0 : 120,
                 ),
+                duration: Duration(milliseconds: 250),
+                curve: Curves.linear,
+                child: FadeTransition(
+                  opacity: _opacityAnimation!,
+                  child: SlideTransition(
+                    position: _slideAnimation!,
+                    child: TextFormField(
+                      decoration: InputDecoration(labelText: 'Confirmar Senha'),
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: true,
+                      validator: _isSignin()
+                          ? null
+                          : (_password) {
+                              final cpassword = _password ?? '';
+                              if (cpassword != _passwordController.text) {
+                                return 'As senhas não coincidem';
+                              }
+                              return null;
+                            },
+                    ),
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 20,
               ),
